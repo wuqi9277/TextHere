@@ -13,6 +13,7 @@ id = ''
 name = ''
 sentences = ''
 sleep_seconds = 10
+reset_all = False
 
 # file check (dataBase.db)
 if path.exists("dadaBase.db"):
@@ -70,6 +71,20 @@ print(states_msg)
 # 设置超时时间（秒）
 timeout = sleep_seconds
 
+# if reset_all
+
+def reset_is_used():
+    with Session(engine) as session:
+        session.query(main_table).update({main_table.is_uesd: False})
+        session.commit()
+        session.flush()
+        session.close()
+
+
+
 # 启动UI线程并传递超时时间
 thread_ui = threading.Thread(target=main_ui, args=(states, id, name, sentences, timeout))
 thread_ui.start()
+
+if reset_all:
+    reset_is_used()
