@@ -4,6 +4,7 @@ from sqlalchemy import String,Boolean,create_engine,select
 from random import choice
 from ui_main import main_ui
 from os import path
+from httpx import get as httpx_get
 import threading
 
 # global states
@@ -14,6 +15,7 @@ name = ''
 sentences = ''
 sleep_seconds = 10
 reset_all = False
+use_internet_sentences = True
 
 # file check (dataBase.db)
 if path.exists("dadaBase.db"):
@@ -55,7 +57,9 @@ if whole_id_list != []:
     id = str(sentences_stmt_result.id)
     name = sentences_stmt_result.name
 
-    sentences_stmt_result.is_uesd = True
+    if use_internet_sentences == False:
+        sentences_stmt_result.is_uesd = True
+
 else:
     states = False
     states_msg = 'all sentences have been selected!'
@@ -64,6 +68,18 @@ session.commit()
 session.flush()
 session.close()
 
+# sent https get request to get sentences
+if use_internet_sentences:
+    url = 'https://v1.hitokoto.cn/?c=d&encode=text'
+    response = httpx_get(url)
+    if response.status_code == 200 and response.text != '':
+        sentences = response.text
+    else:
+        states = False
+        states_msg = 'http get sentences failed !'
+    name = 'hitokoto'
+    id = 'hitokoto'
+    print(response.text)
 
 # build ui and taskkill
 print(states_msg)
