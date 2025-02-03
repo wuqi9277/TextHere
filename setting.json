@@ -1,0 +1,10 @@
+{
+  "states": true,
+  "states_msg": null,
+  "id": "1",
+  "name": "1",
+  "sentences": "1-1",
+  "sleep_seconds": 120,
+  "reset_all": false,
+  "use_internet_sentences": false
+}

@@ -4,11 +4,16 @@ from PyQt5.QtWidgets import QApplication,QMainWindow
 # from ui import Ui_MainWindow
 from string import Template
 # from ui_error import Ui_MainWindow as ui_error
+import os,sys
 
 def main_ui(states: bool, id: str, name: str, sentences: str, timeout: int):
     QtCore.QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QtCore.QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-    app = QApplication([])
+    if os.name == 'nt':
+        os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+        os.environ["QT_SCALE_FACTOR"] = "1"
+        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    app = QApplication(sys.argv)
     windows = QMainWindow()
     if states:
         ui = Ui_MainWindow(id=id, name=name, sentences=sentences)

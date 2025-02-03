@@ -6,6 +6,44 @@ from ui_main import main_ui
 from os import path
 from httpx import get as httpx_get
 import threading
+import json  # 新增JSON模块
+import atexit
+
+# 新增：定义配置文件路径
+SETTING_FILE = "setting.json"
+
+# 新增：保存设置到JSON文件
+def save_settings():
+    settings = {
+        "states": states,
+        "states_msg": states_msg,
+        "id": id,
+        "name": name,
+        "sentences": sentences,
+        "sleep_seconds": sleep_seconds,
+        "reset_all": reset_all,
+        "use_internet_sentences": use_internet_sentences
+    }
+    with open(SETTING_FILE, "w") as f:
+        json.dump(settings, f, indent=2)
+
+# 新增：从JSON文件加载设置
+def load_settings():
+    global states, states_msg, id, name, sentences, sleep_seconds, reset_all, use_internet_sentences
+    try:
+        with open(SETTING_FILE, "r") as f:
+            settings = json.load(f)
+            states = settings.get("states", True)
+            states_msg = settings.get("states_msg", None)
+            id = settings.get("id", '')
+            name = settings.get("name", '')
+            sentences = settings.get("sentences", '')
+            sleep_seconds = settings.get("sleep_seconds", 10)
+            reset_all = settings.get("reset_all", False)
+            use_internet_sentences = settings.get("use_internet_sentences", True)
+    except FileNotFoundError:
+        save_settings()
+
 
 # global states
 states = True
@@ -13,9 +51,12 @@ states_msg = None
 id = ''
 name = ''
 sentences = ''
-sleep_seconds = 10
+sleep_seconds = 120
 reset_all = False
-use_internet_sentences = True
+use_internet_sentences = False
+load_settings()
+atexit.register(save_settings)
+
 
 # file check (dataBase.db)
 if path.exists("dadaBase.db"):
@@ -71,15 +112,19 @@ session.close()
 # sent https get request to get sentences
 if use_internet_sentences:
     url = 'https://v1.hitokoto.cn/?c=d&encode=text'
-    response = httpx_get(url)
-    if response.status_code == 200 and response.text != '':
-        sentences = response.text
-    else:
+    try:
+        response = httpx_get(url)
+        if response.status_code == 200 and response.text != '':
+            sentences = response.text
+            print(response.text)
+        else:
+            states = False
+            states_msg = 'http get sentences failed !'
+    except Exception as e:
         states = False
         states_msg = 'http get sentences failed !'
     name = 'hitokoto'
     id = 'hitokoto'
-    print(response.text)
 
 # build ui and taskkill
 print(states_msg)
@@ -104,3 +149,4 @@ thread_ui.start()
 
 if reset_all:
     reset_is_used()
+
