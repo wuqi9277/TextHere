@@ -126,13 +126,10 @@ if use_internet_sentences:
     name = 'hitokoto'
     id = 'hitokoto'
 
-# build ui and taskkill
 print(states_msg)
 
 # 设置超时时间（秒）
 timeout = sleep_seconds
-
-# if reset_all
 
 def reset_is_used():
     with Session(engine) as session:
@@ -144,9 +141,12 @@ def reset_is_used():
 
 
 # 启动UI线程并传递超时时间
-thread_ui = threading.Thread(target=main_ui, args=(states, id, name, sentences, timeout))
-thread_ui.start()
-
 if reset_all:
     reset_is_used()
+    sentences = 'Reset all sentences successfully !'
+    thread_ui = threading.Thread(target=main_ui, args=(states, id, name, sentences, timeout))
+else:
+    thread_ui = threading.Thread(target=main_ui, args=(states, id, name, sentences, timeout))
+
+thread_ui.start()
 
